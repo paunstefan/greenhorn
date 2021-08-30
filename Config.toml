@@ -1,0 +1,17 @@
+# Greenhorn config file
+
+homepage = "a"
+
+html_template = "data/templates/template.html"
+css = "data/templates/template.css"
+list_template = "data/templates/list.html"
+
+[[pages]]
+name = "a"
+kind = "Single"
+source = "data/pages/singletest.md"
+
+[[pages]]
+name = "b"
+kind = "List"
+source = "data/pages/listtest"
