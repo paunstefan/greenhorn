@@ -3,7 +3,7 @@
 homepage = "a"
 
 html_template = "data/templates/template.html"
-css = "data/templates/template.css"
+css = "data/templates/style.css"
 list_template = "data/templates/list.html"
 
 [[pages]]
