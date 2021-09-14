@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
+use crate::error::GhError;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AppConfig {
     pub homepage: String,
@@ -27,16 +29,16 @@ enum PageKind {
 use crate::render::{render_list, render_page};
 
 impl AppConfig {
-    pub fn generate_page(&self, page_name: &str) -> String {
+    pub fn generate_page(&self, page_name: &str) -> Result<String, GhError> {
         let page = match self.pages.iter().find(|&p| p.name == page_name) {
             Some(p) => p,
-            None => return "Not found".to_string(),
+            None => return Err(GhError::PageNotFound()),
         };
 
         match page.kind {
             PageKind::Single => render_page(self, page),
             PageKind::List => {
-                let contents = fs::read_dir(&page.source).unwrap();
+                let contents = fs::read_dir(&page.source)?;
 
                 // Get directory contents, include only files (not directories)
                 let paths: Vec<String> = contents
@@ -50,14 +52,14 @@ impl AppConfig {
         }
     }
 
-    pub fn generate_homepage(&self) -> String {
+    pub fn generate_homepage(&self) -> Result<String, GhError> {
         self.generate_page(&self.homepage)
     }
 
-    pub fn generate_list_page(&self, list_name: &str, page_name: &str) -> String {
+    pub fn generate_list_page(&self, list_name: &str, page_name: &str) -> Result<String, GhError> {
         let mut page = match self.pages.iter().find(|&p| p.name == list_name) {
             Some(p) => p.clone(),
-            None => return "Not found".to_string(),
+            None => return Err(GhError::PageNotFound()),
         };
 
         page.source.push(page_name);
