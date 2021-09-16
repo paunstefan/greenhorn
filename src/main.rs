@@ -1,20 +1,14 @@
 use axum::{extract, handler::get, response::Html, AddExtensionLayer, Router};
-use std::fs;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 
-// TODO: add env vars handling (for tracing and address)
-// TODO: tests
-// TODO: benchmarking
-// TODO: async reading of files
+// TODO: async reading of files/
+// TODO: read config checks
+// TODO: options handling (for tracing and address and config)
 
-mod appconfig;
-mod error;
-mod render;
-
-use crate::error::GhError;
-use appconfig::AppConfig;
+use greenhorn::appconfig::AppConfig;
+use greenhorn::error::GhError;
 
 #[tokio::main]
 async fn main() {
@@ -24,7 +18,7 @@ async fn main() {
     }
     tracing_subscriber::fmt::init();
 
-    let read_conf: AppConfig = toml::from_str(&fs::read_to_string("Config.toml").unwrap()).unwrap();
+    let read_conf = AppConfig::new("tests/data/Config.toml");
 
     let shared_state = Arc::new(read_conf);
 

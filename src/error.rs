@@ -11,8 +11,6 @@ use thiserror::Error;
 pub enum GhError {
     #[error("Page not found!")]
     PageNotFound(),
-    #[error("Server error!")]
-    ServerError(),
     #[error("Configuration error")]
     ConfigurationError(#[from] io::Error),
     #[error("Template error")]
@@ -26,10 +24,6 @@ impl IntoResponse for GhError {
     fn into_response(self) -> Response<Self::Body> {
         let (status, body) = match self {
             GhError::PageNotFound() => (StatusCode::NOT_FOUND, Body::from("Page not found!")),
-            GhError::ServerError() => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Body::from("Server error!"),
-            ),
             GhError::ConfigurationError(_) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Body::from("Configuration error!"),

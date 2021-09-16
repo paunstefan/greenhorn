@@ -29,6 +29,11 @@ enum PageKind {
 use crate::render::{render_list, render_page};
 
 impl AppConfig {
+    pub fn new(path: &str) -> Self {
+        // Crash the program if config can't be read
+        toml::from_str(&fs::read_to_string(path).unwrap()).unwrap()
+    }
+
     pub fn generate_page(&self, page_name: &str) -> Result<String, GhError> {
         let page = match self.pages.iter().find(|&p| p.name == page_name) {
             Some(p) => p,
