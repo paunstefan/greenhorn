@@ -34,14 +34,14 @@ impl AppConfig {
         toml::from_str(&fs::read_to_string(path).unwrap()).unwrap()
     }
 
-    pub fn generate_page(&self, page_name: &str) -> Result<String, GhError> {
+    pub async fn generate_page(&self, page_name: &str) -> Result<String, GhError> {
         let page = match self.pages.iter().find(|&p| p.name == page_name) {
             Some(p) => p,
             None => return Err(GhError::PageNotFound()),
         };
 
         match page.kind {
-            PageKind::Single => render_page(self, page),
+            PageKind::Single => render_page(self, page).await,
             PageKind::List => {
                 let contents = fs::read_dir(&page.source)?;
 
@@ -52,16 +52,20 @@ impl AppConfig {
                     .map(|p| p.file_name().unwrap().to_str().unwrap().to_string())
                     .collect();
 
-                render_list(self, page, &paths)
+                render_list(self, page, &paths).await
             }
         }
     }
 
-    pub fn generate_homepage(&self) -> Result<String, GhError> {
-        self.generate_page(&self.homepage)
+    pub async fn generate_homepage(&self) -> Result<String, GhError> {
+        self.generate_page(&self.homepage).await
     }
 
-    pub fn generate_list_page(&self, list_name: &str, page_name: &str) -> Result<String, GhError> {
+    pub async fn generate_list_page(
+        &self,
+        list_name: &str,
+        page_name: &str,
+    ) -> Result<String, GhError> {
         let mut page = match self.pages.iter().find(|&p| p.name == list_name) {
             Some(p) => p.clone(),
             None => return Err(GhError::PageNotFound()),
@@ -69,6 +73,6 @@ impl AppConfig {
 
         page.source.push(page_name);
 
-        render_page(self, &page)
+        render_page(self, &page).await
     }
 }

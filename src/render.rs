@@ -1,6 +1,5 @@
 use serde::Serialize;
 use std::collections::HashMap;
-use std::fs;
 use tinytemplate::TinyTemplate;
 
 use crate::appconfig::{AppConfig, Page};
@@ -13,15 +12,14 @@ struct PageContext<'a> {
     body: &'a str,
 }
 
-#[tracing::instrument]
-pub fn render_page(app_state: &AppConfig, page: &Page) -> Result<String, GhError> {
-    tracing::event!(tracing::Level::TRACE, "Start");
-    let mut tt = TinyTemplate::new();
+pub async fn render_page(app_state: &AppConfig, page: &Page) -> Result<String, GhError> {
+    let (html_template, css) = tokio::try_join!(
+        tokio::fs::read_to_string(&app_state.html_template),
+        tokio::fs::read_to_string(&app_state.css)
+    )?;
 
-    let html_template = fs::read_to_string(&app_state.html_template)?;
     let page_html = markdown::file_to_html(std::path::Path::new(&page.source))
         .map_err(|_| GhError::PageNotFound())?;
-    let css = fs::read_to_string(&app_state.css)?;
 
     let ctx = PageContext {
         title: &page.name,
@@ -29,28 +27,27 @@ pub fn render_page(app_state: &AppConfig, page: &Page) -> Result<String, GhError
         body: &page_html,
     };
 
+    let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&tinytemplate::format_unescaped);
     tt.add_template("normal_page", &html_template)?;
 
     let ret = tt.render("normal_page", &ctx)?;
 
-    tracing::event!(tracing::Level::TRACE, "Stop");
-
     Ok(ret)
 }
 
-#[tracing::instrument]
-pub fn render_list(
+pub async fn render_list(
     app_state: &AppConfig,
     page: &Page,
     paths: &[String],
 ) -> Result<String, GhError> {
-    tracing::event!(tracing::Level::TRACE, "Start");
-    let mut tt = TinyTemplate::new();
+    let (list_template, html_template, css) = tokio::try_join!(
+        tokio::fs::read_to_string(&app_state.list_template),
+        tokio::fs::read_to_string(&app_state.html_template),
+        tokio::fs::read_to_string(&app_state.css)
+    )?;
 
-    let list_template = fs::read_to_string(&app_state.list_template)?;
-    let html_template = fs::read_to_string(&app_state.html_template)?;
-    let css = fs::read_to_string(&app_state.css)?;
+    let mut tt = TinyTemplate::new();
 
     tt.set_default_formatter(&tinytemplate::format_unescaped);
 
@@ -70,8 +67,6 @@ pub fn render_list(
     tt.add_template("list_page", &html_template)?;
 
     let ret = tt.render("list_page", &ctx)?;
-
-    tracing::event!(tracing::Level::TRACE, "Stop");
 
     Ok(ret)
 }
