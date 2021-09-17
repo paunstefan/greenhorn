@@ -11,8 +11,8 @@ fn load_config() {
     // TODO
 }
 
-#[test]
-fn render_page_simple() {
+#[tokio::test]
+async fn render_page_simple() {
     let expected = "<!DOCTYPE html>
 <html>
 
@@ -41,13 +41,13 @@ h1   {color: blue;}
 
     let read_conf = AppConfig::new("tests/data/Config.toml");
 
-    let rendered = read_conf.generate_page("a").unwrap();
+    let rendered = read_conf.generate_page("a").await.unwrap();
 
     assert_eq!(rendered, expected);
 }
 
-#[test]
-fn render_homepage() {
+#[tokio::test]
+async fn render_homepage() {
     let expected = "<!DOCTYPE html>
 <html>
 
@@ -76,13 +76,13 @@ h1   {color: blue;}
 
     let read_conf = AppConfig::new("tests/data/Config.toml");
 
-    let rendered = read_conf.generate_homepage().unwrap();
+    let rendered = read_conf.generate_homepage().await.unwrap();
 
     assert_eq!(rendered, expected);
 }
 
-#[test]
-fn render_list() {
+#[tokio::test]
+async fn render_list() {
     let expected = "<!DOCTYPE html>
 <html>
 
@@ -118,13 +118,13 @@ h1   {color: blue;}
 
     let read_conf = AppConfig::new("tests/data/Config.toml");
 
-    let rendered = read_conf.generate_page("b").unwrap();
+    let rendered = read_conf.generate_page("b").await.unwrap();
 
     assert_eq!(rendered, expected);
 }
 
-#[test]
-fn render_list_page() {
+#[tokio::test]
+async fn render_list_page() {
     let expected = "<!DOCTYPE html>
 <html>
 
@@ -151,7 +151,7 @@ h1   {color: blue;}
 
     let read_conf = AppConfig::new("tests/data/Config.toml");
 
-    let rendered = read_conf.generate_list_page("b", "l1.md").unwrap();
+    let rendered = read_conf.generate_list_page("b", "l1.md").await.unwrap();
 
     assert_eq!(rendered, expected);
 }

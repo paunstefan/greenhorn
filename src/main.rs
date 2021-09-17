@@ -41,7 +41,8 @@ async fn main() {
 
 async fn get_home(state: extract::Extension<Arc<AppConfig>>) -> Result<Html<String>, GhError> {
     let state: Arc<AppConfig> = state.0;
-    let res = state.generate_homepage()?;
+    let res = state.generate_homepage().await?;
+
     Ok(Html(res))
 }
 
@@ -51,7 +52,7 @@ async fn get_page(
 ) -> Result<Html<String>, GhError> {
     let state: Arc<AppConfig> = state.0;
 
-    let res = state.generate_page(&page)?;
+    let res = state.generate_page(&page).await?;
 
     Ok(Html(res))
 }
@@ -62,7 +63,7 @@ async fn get_list_page(
 ) -> Result<Html<String>, GhError> {
     let state: Arc<AppConfig> = state.0;
 
-    let res = state.generate_list_page(&list, &page)?;
+    let res = state.generate_list_page(&list, &page).await?;
 
     Ok(Html(res))
 }
