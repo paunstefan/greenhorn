@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::error::GhError;
 
@@ -30,8 +30,31 @@ use crate::render::{render_list, render_page};
 
 impl AppConfig {
     pub fn new(path: &str) -> Self {
-        // Crash the program if config can't be read
-        toml::from_str(&fs::read_to_string(path).unwrap()).unwrap()
+        let config: AppConfig = toml::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+
+        if !Path::new(&config.html_template).exists()
+            || !Path::new(&config.list_template).exists()
+            || !Path::new(&config.css).exists()
+        {
+            panic!("Template files do not exist.")
+        }
+
+        config.pages.iter().for_each(|p| {
+            if !Path::new(&p.source).exists() {
+                panic!("Page source \"{}\" does not exist", &p.source.display())
+            }
+        });
+
+        if !config
+            .pages
+            .iter()
+            .map(|p| &p.name)
+            .any(|n| n == &config.homepage)
+        {
+            panic!("Homepage not part of declared pages")
+        }
+
+        config
     }
 
     pub async fn generate_page(&self, page_name: &str) -> Result<String, GhError> {

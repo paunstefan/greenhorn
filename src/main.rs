@@ -3,8 +3,6 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 
-// TODO: async reading of files/
-// TODO: read config checks
 // TODO: options handling (for tracing and address and config)
 
 use greenhorn::appconfig::AppConfig;
