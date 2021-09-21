@@ -29,8 +29,9 @@ enum PageKind {
 use crate::render::{render_list, render_page};
 
 impl AppConfig {
-    pub fn new(path: &str) -> Self {
-        let config: AppConfig = toml::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+    pub fn new(path: PathBuf) -> Self {
+        let config: AppConfig =
+            toml::from_str(&fs::read_to_string(path).unwrap()).expect("Couldn't read config");
 
         if !Path::new(&config.html_template).exists()
             || !Path::new(&config.list_template).exists()

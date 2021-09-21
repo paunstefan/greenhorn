@@ -1,22 +1,32 @@
 use axum::{extract, handler::get, response::Html, AddExtensionLayer, Router};
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
+use structopt::StructOpt;
 use tower_http::trace::TraceLayer;
 
-// TODO: options handling (for tracing and address and config)
+#[derive(StructOpt, Debug)]
+#[structopt(name = "greenhorn")]
+struct GhOptions {
+    /// Server address and port
+    #[structopt(short, long)]
+    address: String,
+
+    /// Configuration file (TOML)
+    #[structopt(parse(from_os_str), short, long)]
+    config_file: PathBuf,
+}
 
 use greenhorn::appconfig::AppConfig;
 use greenhorn::error::GhError;
 
 #[tokio::main]
 async fn main() {
-    // temporary, will be changed in the future
-    if std::env::var("RUST_LOG").is_err() {
-        std::env::set_var("RUST_LOG", "greenhorn=trace,tower_http=trace")
-    }
+    let options = GhOptions::from_args();
+
     tracing_subscriber::fmt::init();
 
-    let read_conf = AppConfig::new("tests/data/Config.toml");
+    let read_conf = AppConfig::new(options.config_file);
 
     let shared_state = Arc::new(read_conf);
 
@@ -29,7 +39,7 @@ async fn main() {
         .layer(TraceLayer::new_for_http());
 
     // Run the app
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr: SocketAddr = options.address.parse().expect("Address not valid");
     tracing::debug!("listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
