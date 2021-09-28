@@ -14,6 +14,7 @@ The required fields are:
 * html_template : this combined with the following `css` field describe the header and footer of the page and the overall style what all pages will have
 * css
 * list_template : this will be the layout of the list pages on the site
+* media_dir : directory to put static files (such as images)
 * homepage : you must assign a homepage, from the configured list of pages
 
 The pages are also listed in the config file with the following fields:
@@ -31,6 +32,7 @@ homepage = "a"
 html_template = "tests/data/templates/template.html"
 css = "tests/data/templates/style.css"
 list_template = "tests/data/templates/list.html"
+media_dir = "tests/data/media"
 
 [[pages]]
 name = "a"
