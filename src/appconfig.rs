@@ -1,15 +1,16 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::error::GhError;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AppConfig {
     pub homepage: String,
-    pub html_template: String,
-    pub list_template: String,
-    pub css: String,
+    pub html_template: PathBuf,
+    pub list_template: PathBuf,
+    pub media_dir: PathBuf,
+    pub css: PathBuf,
     pub pages: Vec<Page>,
 }
 
@@ -33,15 +34,15 @@ impl AppConfig {
         let config: AppConfig =
             toml::from_str(&fs::read_to_string(path).unwrap()).expect("Couldn't read config");
 
-        if !Path::new(&config.html_template).exists()
-            || !Path::new(&config.list_template).exists()
-            || !Path::new(&config.css).exists()
+        if !&config.html_template.exists()
+            || !&config.list_template.exists()
+            || !&config.css.exists()
         {
             panic!("Template files do not exist.")
         }
 
         config.pages.iter().for_each(|p| {
-            if !Path::new(&p.source).exists() {
+            if !&p.source.exists() {
                 panic!("Page source \"{}\" does not exist", &p.source.display())
             }
         });

@@ -1,9 +1,12 @@
-use axum::{extract, handler::get, response::Html, AddExtensionLayer, Router};
+use axum::{
+    extract, handler::get, http::StatusCode, response::Html, service, AddExtensionLayer, Router,
+};
+use std::convert::Infallible;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
-use tower_http::trace::TraceLayer;
+use tower_http::{services::ServeDir, trace::TraceLayer};
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "greenhorn")]
@@ -35,6 +38,17 @@ async fn main() {
         .route("/", get(get_home))
         .route("/:page", get(get_page))
         .route("/:list/:page", get(get_list_page))
+        .nest(
+            "/static",
+            service::get(ServeDir::new(&shared_state.media_dir)).handle_error(
+                |error: std::io::Error| {
+                    Ok::<_, Infallible>((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        format!("Unhandled internal error: {}", error),
+                    ))
+                },
+            ),
+        )
         .layer(AddExtensionLayer::new(shared_state))
         .layer(TraceLayer::new_for_http());
 

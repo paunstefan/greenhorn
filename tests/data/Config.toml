@@ -5,6 +5,7 @@ homepage = "a"
 html_template = "tests/data/templates/template.html"
 css = "tests/data/templates/style.css"
 list_template = "tests/data/templates/list.html"
+media_dir = "tests/data/media"
 
 [[pages]]
 name = "a"

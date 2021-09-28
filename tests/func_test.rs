@@ -1,5 +1,6 @@
 use greenhorn::appconfig::AppConfig;
 use greenhorn::error::GhError;
+use std::path::PathBuf;
 
 // Functional tests
 // They only test the complete rendering of a page
@@ -7,7 +8,7 @@ use greenhorn::error::GhError;
 
 #[test]
 fn load_config() {
-    let read_conf = AppConfig::new("tests/data/Config.toml");
+    let read_conf = AppConfig::new(PathBuf::from("tests/data/Config.toml"));
     // TODO
 }
 
@@ -39,7 +40,7 @@ h1   {color: blue;}
 
 </html>";
 
-    let read_conf = AppConfig::new("tests/data/Config.toml");
+    let read_conf = AppConfig::new(PathBuf::from("tests/data/Config.toml"));
 
     let rendered = read_conf.generate_page("a").await.unwrap();
 
@@ -74,7 +75,7 @@ h1   {color: blue;}
 
 </html>";
 
-    let read_conf = AppConfig::new("tests/data/Config.toml");
+    let read_conf = AppConfig::new(PathBuf::from("tests/data/Config.toml"));
 
     let rendered = read_conf.generate_homepage().await.unwrap();
 
@@ -116,7 +117,7 @@ h1   {color: blue;}
 
 </html>";
 
-    let read_conf = AppConfig::new("tests/data/Config.toml");
+    let read_conf = AppConfig::new(PathBuf::from("tests/data/Config.toml"));
 
     let rendered = read_conf.generate_page("b").await.unwrap();
 
@@ -149,7 +150,7 @@ h1   {color: blue;}
 
 </html>";
 
-    let read_conf = AppConfig::new("tests/data/Config.toml");
+    let read_conf = AppConfig::new(PathBuf::from("tests/data/Config.toml"));
 
     let rendered = read_conf.generate_list_page("b", "l1.md").await.unwrap();
 
