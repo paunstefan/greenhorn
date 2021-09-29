@@ -2,12 +2,14 @@
 name = "greenhorn"
 version = "0.2.0"
 edition = "2018"
+authors = ["Paun Stefan <paunstefan@protonmail.com>"]
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["rt-multi-thread", "fs", "macros"] }
 axum = "0.2"
 pulldown-cmark = "0.8"
 tinytemplate = "1.2"

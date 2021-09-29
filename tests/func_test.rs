@@ -99,11 +99,11 @@ h1   {color: blue;}
 <ul>
     
     <li>
-        <a href=\"l1.md\">l1.md</a>
+        <a href=\"l1.md\">l1</a>
     </li>
     
     <li>
-        <a href=\"l2.md\">l2.md</a>
+        <a href=\"l2.md\">l2</a>
     </li>
     
 </ul>

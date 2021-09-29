@@ -22,8 +22,6 @@ struct GhOptions {
     config_file: PathBuf,
 }
 
-// TODO: list names without _
-
 use greenhorn::appconfig::AppConfig;
 use greenhorn::error::GhError;
 

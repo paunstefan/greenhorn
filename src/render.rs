@@ -14,6 +14,13 @@ struct PageContext<'a> {
     body: &'a str,
 }
 
+/// Variables for generating pages list
+#[derive(Debug, Serialize)]
+struct ListContext<'a> {
+    link: &'a str,
+    display: String,
+}
+
 /// Renders a markdown file, single or page from a list
 pub async fn render_page(app_state: &AppConfig, page: &Page) -> Result<String, GhError> {
     let (html_template, css, page_html) = tokio::try_join!(
@@ -54,13 +61,21 @@ pub async fn render_list(
 
     // Generate list HTML
     tt.add_template("list", &list_template)?;
-    let mut list_ser = HashMap::new();
-    list_ser.insert("list", paths);
 
+    let list_ctx: Vec<ListContext> = paths
+        .iter()
+        .map(|p| ListContext {
+            link: p,
+            display: format_page_name(p),
+        })
+        .collect();
+
+    let mut list_ser = HashMap::new();
+    list_ser.insert("list", list_ctx);
     let rendered_list = tt.render("list", &list_ser)?;
 
     // Generate full page HTML
-    let ctx = PageContext {
+    let page_ctx = PageContext {
         title: &page.name,
         css: &css,
         body: &rendered_list,
@@ -68,7 +83,7 @@ pub async fn render_list(
 
     tt.add_template("list_page", &html_template)?;
 
-    let ret = tt.render("list_page", &ctx)?;
+    let ret = tt.render("list_page", &page_ctx)?;
 
     Ok(ret)
 }
@@ -85,4 +100,15 @@ async fn markdown_to_html(path: &std::path::Path) -> Result<String, std::io::Err
     html::push_html(&mut html_output, parser);
 
     Ok(html_output)
+}
+
+/// Removes all '_' and everything after a '.'
+fn format_page_name(page: &str) -> String {
+    let mut new = page.replace("_", " ");
+
+    if let Some(index) = new.find('.') {
+        new.truncate(index);
+    }
+
+    new
 }
