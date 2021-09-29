@@ -4,6 +4,7 @@ use tinytemplate::TinyTemplate;
 
 use crate::appconfig::{AppConfig, Page};
 use crate::error::GhError;
+use pulldown_cmark::{html, Options, Parser};
 
 #[derive(Debug, Serialize)]
 struct PageContext<'a> {
@@ -13,13 +14,11 @@ struct PageContext<'a> {
 }
 
 pub async fn render_page(app_state: &AppConfig, page: &Page) -> Result<String, GhError> {
-    let (html_template, css) = tokio::try_join!(
+    let (html_template, css, page_html) = tokio::try_join!(
         tokio::fs::read_to_string(&app_state.html_template),
-        tokio::fs::read_to_string(&app_state.css)
+        tokio::fs::read_to_string(&app_state.css),
+        markdown_to_html(&page.source),
     )?;
-
-    let page_html = markdown::file_to_html(std::path::Path::new(&page.source))
-        .map_err(|_| GhError::PageNotFound())?;
 
     let ctx = PageContext {
         title: &page.name,
@@ -69,4 +68,19 @@ pub async fn render_list(
     let ret = tt.render("list_page", &ctx)?;
 
     Ok(ret)
+}
+
+async fn markdown_to_html(path: &std::path::Path) -> Result<String, std::io::Error> {
+    let input = tokio::fs::read_to_string(path).await?;
+
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_STRIKETHROUGH);
+    options.insert(Options::ENABLE_TABLES);
+    let parser = Parser::new_ext(&input, options);
+
+    // Write to String buffer.
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
+
+    Ok(html_output)
 }

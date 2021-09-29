@@ -1,5 +1,4 @@
 use greenhorn::appconfig::AppConfig;
-use greenhorn::error::GhError;
 use std::path::PathBuf;
 
 // Functional tests
@@ -30,8 +29,7 @@ h1   {color: blue;}
         <h1>A heading here</h1>
     </header>
     <article>
-<h2 id='single_page_test'>Single page test</h2>
-
+<h2>Single page test</h2>
 <p>hello from the normal page</p>
 
     </article>
@@ -65,8 +63,7 @@ h1   {color: blue;}
         <h1>A heading here</h1>
     </header>
     <article>
-<h2 id='single_page_test'>Single page test</h2>
-
+<h2>Single page test</h2>
 <p>hello from the normal page</p>
 
     </article>
@@ -142,7 +139,7 @@ h1   {color: blue;}
         <h1>A heading here</h1>
     </header>
     <article>
-<h2 id='list_item_1'>List item 1</h2>
+<h2>List item 1</h2>
 
     </article>
     <footer>This is a footer</footer>

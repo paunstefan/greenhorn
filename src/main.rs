@@ -20,6 +20,10 @@ struct GhOptions {
     config_file: PathBuf,
 }
 
+// TODO: list names without _
+// TODO: comments
+// TODO: lints
+
 use greenhorn::appconfig::AppConfig;
 use greenhorn::error::GhError;
 
