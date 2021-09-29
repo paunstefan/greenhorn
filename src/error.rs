@@ -17,6 +17,7 @@ pub enum GhError {
     TemplateError(#[from] tinytemplate::error::Error),
 }
 
+/// Implementation for axum HTTP errors
 impl IntoResponse for GhError {
     type Body = Body;
     type BodyError = <Self::Body as axum::body::HttpBody>::Error;

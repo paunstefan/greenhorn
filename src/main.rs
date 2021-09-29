@@ -1,3 +1,5 @@
+//! Personal page application
+
 use axum::{
     extract, handler::get, http::StatusCode, response::Html, service, AddExtensionLayer, Router,
 };
@@ -21,8 +23,6 @@ struct GhOptions {
 }
 
 // TODO: list names without _
-// TODO: comments
-// TODO: lints
 
 use greenhorn::appconfig::AppConfig;
 use greenhorn::error::GhError;

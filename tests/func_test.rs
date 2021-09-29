@@ -7,8 +7,7 @@ use std::path::PathBuf;
 
 #[test]
 fn load_config() {
-    let read_conf = AppConfig::new(PathBuf::from("tests/data/Config.toml"));
-    // TODO
+    let _read_conf = AppConfig::new(PathBuf::from("tests/data/Config.toml"));
 }
 
 #[tokio::test]

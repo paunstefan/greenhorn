@@ -17,12 +17,12 @@ pub struct AppConfig {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Page {
     pub name: String,
-    kind: PageKind,
+    pub kind: PageKind,
     pub source: PathBuf,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Copy)]
-enum PageKind {
+pub enum PageKind {
     Single,
     List,
 }
@@ -37,6 +37,7 @@ impl AppConfig {
         if !&config.html_template.exists()
             || !&config.list_template.exists()
             || !&config.css.exists()
+            || !&config.media_dir.exists()
         {
             panic!("Template files do not exist.")
         }
@@ -59,7 +60,10 @@ impl AppConfig {
         config
     }
 
+    /// Generates a first level page
+    /// Can be a Single page or a List page
     pub async fn generate_page(&self, page_name: &str) -> Result<String, GhError> {
+        // First check if page exists
         let page = match self.pages.iter().find(|&p| p.name == page_name) {
             Some(p) => p,
             None => return Err(GhError::PageNotFound()),
@@ -70,7 +74,7 @@ impl AppConfig {
             PageKind::List => {
                 let contents = fs::read_dir(&page.source)?;
 
-                // Get directory contents, include only files (not directories)
+                // Get directory contents to list, include only files (not directories)
                 let paths: Vec<String> = contents
                     .map(|p| p.unwrap().path())
                     .filter(|p| p.is_file())
@@ -86,11 +90,13 @@ impl AppConfig {
         self.generate_page(&self.homepage).await
     }
 
+    /// Generates a 2nd level page from a list
     pub async fn generate_list_page(
         &self,
         list_name: &str,
         page_name: &str,
     ) -> Result<String, GhError> {
+        // Check if page exists
         let mut page = match self.pages.iter().find(|&p| p.name == list_name) {
             Some(p) => p.clone(),
             None => return Err(GhError::PageNotFound()),

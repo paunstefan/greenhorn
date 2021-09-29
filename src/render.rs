@@ -6,6 +6,7 @@ use crate::appconfig::{AppConfig, Page};
 use crate::error::GhError;
 use pulldown_cmark::{html, Options, Parser};
 
+/// Variables for generating page from a template
 #[derive(Debug, Serialize)]
 struct PageContext<'a> {
     title: &'a str,
@@ -13,6 +14,7 @@ struct PageContext<'a> {
     body: &'a str,
 }
 
+/// Renders a markdown file, single or page from a list
 pub async fn render_page(app_state: &AppConfig, page: &Page) -> Result<String, GhError> {
     let (html_template, css, page_html) = tokio::try_join!(
         tokio::fs::read_to_string(&app_state.html_template),
@@ -35,6 +37,7 @@ pub async fn render_page(app_state: &AppConfig, page: &Page) -> Result<String, G
     Ok(ret)
 }
 
+/// Renders a list of pages (List kind)
 pub async fn render_list(
     app_state: &AppConfig,
     page: &Page,
@@ -47,16 +50,16 @@ pub async fn render_list(
     )?;
 
     let mut tt = TinyTemplate::new();
-
     tt.set_default_formatter(&tinytemplate::format_unescaped);
 
+    // Generate list HTML
     tt.add_template("list", &list_template)?;
-
     let mut list_ser = HashMap::new();
     list_ser.insert("list", paths);
 
     let rendered_list = tt.render("list", &list_ser)?;
 
+    // Generate full page HTML
     let ctx = PageContext {
         title: &page.name,
         css: &css,
@@ -78,7 +81,6 @@ async fn markdown_to_html(path: &std::path::Path) -> Result<String, std::io::Err
     options.insert(Options::ENABLE_TABLES);
     let parser = Parser::new_ext(&input, options);
 
-    // Write to String buffer.
     let mut html_output = String::new();
     html::push_html(&mut html_output, parser);
 
