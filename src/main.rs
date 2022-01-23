@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
 use tower_http::{services::ServeDir, trace::TraceLayer};
+use tracing_subscriber::{filter, prelude::*};
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "greenhorn")]
@@ -29,7 +30,22 @@ use greenhorn::error::GhError;
 async fn main() {
     let options = GhOptions::from_args();
 
-    tracing_subscriber::fmt::init();
+    let filter = filter::Targets::new()
+        // Enable the `INFO` level for anything in `my_crate`
+        .with_target("greenhorn", tracing::Level::DEBUG)
+        .with_target("axum", tracing::Level::DEBUG)
+        .with_target("tower_http", tracing::Level::WARN);
+
+    let registry = tracing_subscriber::registry();
+    match tracing_journald::layer() {
+        Ok(subscriber) => {
+            registry.with(subscriber.with_filter(filter)).init();
+        }
+        Err(e) => {
+            registry.init();
+            tracing::error!("Couldn't connect to journald: {}", e);
+        }
+    }
 
     let read_conf = AppConfig::new(options.config_file);
 
@@ -52,11 +68,11 @@ async fn main() {
             ),
         )
         .layer(AddExtensionLayer::new(shared_state))
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http().on_body_chunk(()).on_eos(()));
 
     // Run the app
     let addr: SocketAddr = options.address.parse().expect("Address not valid");
-    tracing::debug!("listening on {}", addr);
+    tracing::info!("Listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
@@ -66,6 +82,7 @@ async fn main() {
 async fn get_home(state: extract::Extension<Arc<AppConfig>>) -> Result<Html<String>, GhError> {
     let state: Arc<AppConfig> = state.0;
     let res = state.generate_homepage().await?;
+    tracing::info!("Getting home");
 
     Ok(Html(res))
 }
@@ -75,6 +92,7 @@ async fn get_page(
     state: extract::Extension<Arc<AppConfig>>,
 ) -> Result<Html<String>, GhError> {
     let state: Arc<AppConfig> = state.0;
+    tracing::info!("Generating page: {}", &page);
 
     let res = state.generate_page(&page).await?;
 
@@ -86,6 +104,7 @@ async fn get_list_page(
     state: extract::Extension<Arc<AppConfig>>,
 ) -> Result<Html<String>, GhError> {
     let state: Arc<AppConfig> = state.0;
+    tracing::info!("Generating list page: {}/{}", &list, &page);
 
     let res = state.generate_list_page(&list, &page).await?;
 
